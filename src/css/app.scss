@@ -1,1 +1,17 @@
 // app global css in SCSS form
+@import './quasar.variables.scss';
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
+
+:not(.q-icon) {
+  font-family: 'Manrope', sans-serif !important;
+}
+
+.q-field__native {
+  color: $primary;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 21.86px;
+  text-align: left;
+  text-underline-position: from-font;
+  text-decoration-skip-ink: none;
+}
