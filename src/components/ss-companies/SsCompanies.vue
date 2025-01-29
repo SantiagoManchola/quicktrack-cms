@@ -1,4 +1,4 @@
 <template>
-    Dashboard
+    Companies
 </template>
   

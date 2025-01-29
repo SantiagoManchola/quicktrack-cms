@@ -89,9 +89,7 @@ const handleLogin = async () => {
       } else {
         authStore.login(token, keepSession.value, expires_in, router, $q, t)
 
-        if (authStore.userRole === 'Admin') {
-          router.push({ name: 'adminDashboard' })
-        } else {
+        if (authStore.userRole) {
           router.push({ name: 'dashboard' })
         }
       }

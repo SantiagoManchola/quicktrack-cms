@@ -1,6 +1,7 @@
 const routes = [
   {
     path: '/',
+    name: 'dashboard',
     component: () => import('layouts/MainLayout.vue'),
     meta: {
       requiresAuth: true,
@@ -8,9 +9,21 @@ const routes = [
     children: [
       {
         path: '',
-        name: 'dashboard',
-        component: () => import('src/components/ss-dashboard/SsDashboard.vue'),
-        meta: { requiresAuth: true, role: 'Driver' },
+        name: 'companies',
+        component: () => import('src/components/ss-companies/SsCompanies.vue'),
+        meta: { requiresAuth: true, role: 'Admin' },
+      },
+      {
+        path: '',
+        name: 'vehicles',
+        component: () => import('src/components/ss-vehicles/SsVehicles.vue'),
+        meta: { requiresAuth: true, role: 'Admin' },
+      },
+      {
+        path: '',
+        name: 'splashes',
+        component: () => import('src/components/ss-splashes/SsSplashes.vue'),
+        meta: { requiresAuth: true, role: 'Admin' },
       },
     ],
   },

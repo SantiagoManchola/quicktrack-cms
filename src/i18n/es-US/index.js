@@ -21,4 +21,9 @@ export default {
   notPossibleToLogin: 'y no es posible iniciar sesión.',
   contactAdminToReactivate: 'Por favor, contacta al administrador para reactivar tu acceso.',
   sessionExpired: 'Tu sesión ha expirado',
+  companies: 'Empresas',
+  vehicles_types: 'Tipos de vehículos',
+  splashes: 'Splashes',
+  superAdmin: 'Super administrador',
+  logout: 'Cerrar sesión',
 }
