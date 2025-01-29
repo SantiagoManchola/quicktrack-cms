@@ -1,7 +1,8 @@
 <template>
   <div class="input-wrapper">
-    <label class="input-label">{{ label }}</label>
+    <label v-if="type !== 'checkbox'" class="input-label">{{ label }}</label>
     <q-input
+      v-if="type !== 'checkbox'"
       v-model="internalValue"
       :type="computedType"
       :placeholder="placeholder"
@@ -10,6 +11,7 @@
       :rules="computedRules"
       outlined
       class="form-input"
+      :autocomplete="computedAutocomplete"
     >
       <template v-slot:append>
         <q-icon
@@ -21,14 +23,20 @@
         />
       </template>
     </q-input>
+    <div v-else class="checkbox-wrapper">
+      <q-checkbox v-model="internalValue" :label="label" :rules="computedRules" />
+    </div>
   </div>
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
 import { ref, watch, computed } from 'vue'
 
+const { t } = useI18n()
+
 const props = defineProps({
-  modelValue: [String, Number],
+  modelValue: [String, Number, Boolean],
   label: String,
   type: {
     type: String,
@@ -43,6 +51,7 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  required: Boolean,
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -60,30 +69,26 @@ const computedType = computed(() => {
 
 const computedRules = computed(() => {
   const rules = []
+
+  if (props.required) {
+    rules.push((val) => !!val || t('requiredField'))
+  }
+
   switch (props.type) {
-    case 'text':
-      rules.push((val) => !!val || 'Completa este campo')
-      break
     case 'email':
-      rules.push(
-        (val) => !!val || 'Este campo es requerido',
-        (val) => /.+@.+\..+/.test(val) || 'Debe ser un correo válido',
-      )
+      rules.push((val) => /.+@.+\..+/.test(val) || t('invalidEmail'))
       break
     case 'number':
-      rules.push(
-        (val) => !!val || 'Este campo es requerido',
-        (val) => !isNaN(Number(val)) || 'Debe ser un número válido',
-      )
+      rules.push((val) => !isNaN(Number(val)) || t('invalidNumber'))
       break
-    case 'password':
-      rules.push((val) => !!val || 'Completa este campo')
-      break
-    // Agrega más casos según sea necesario
     default:
       break
   }
   return rules
+})
+
+const computedAutocomplete = computed(() => {
+  return props.type === 'password' ? 'current-password' : undefined
 })
 
 watch(
@@ -104,7 +109,6 @@ watch(
 <style lang="scss" scoped>
 .input-wrapper {
   position: relative;
-  margin-bottom: 16px;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -118,6 +122,14 @@ watch(
   }
   .input-field {
     width: 100%;
+  }
+  .checkbox-wrapper {
+    font-size: 18px;
+    font-weight: 300;
+    line-height: 24.59px;
+    text-align: left;
+    text-underline-position: from-font;
+    text-decoration-skip-ink: none;
   }
 }
 </style>

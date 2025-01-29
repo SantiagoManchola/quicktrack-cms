@@ -2,6 +2,26 @@
 // so you can safely delete all default props below
 
 export default {
-  failed: 'Action failed',
-  success: 'Action was successful'
+  welcomeMessage: 'Welcome back!',
+  forgotPassword: 'Forgot password?',
+  identifyLabel: 'Identify',
+  identifyPlaceholder: 'Email, username or ID',
+  password: 'Password',
+  keepSession: 'Keep session logged in',
+  login: 'Log in',
+  requiredField: 'Required field',
+  invalidEmail: 'Invalid email',
+  invalidNumber: 'Invalid number',
+  errorMessage: 'An error has occurred',
+  enterYourEmail: 'Enter your email',
+  toReceiveALink: 'to receive a password reset link.',
+  email: 'Email',
+  emailPlaceholder: 'example',
+  next: 'Next',
+  emailSentMessage: 'Check your email, we sent a recovery link to:',
+  goBack: 'Go back',
+  profileDisabled: 'Your entity profile is disabled',
+  notPossibleToLogin: 'and it is not possible to log in.',
+  contactAdminToReactivate: 'Please contact the administrator to reactivate your access.',
+  sessionExpired: 'Your session has expired',
 }

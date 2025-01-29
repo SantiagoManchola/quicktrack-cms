@@ -10,10 +10,7 @@ const routes = [
         path: '',
         name: 'dashboard',
         component: () => import('src/components/ss-dashboard/SsDashboard.vue'),
-        meta: {
-          requiresAuth: true,
-          roles: ['Client'],
-        },
+        meta: { requiresAuth: true, role: 'Driver' },
       },
     ],
   },
@@ -21,20 +18,25 @@ const routes = [
   {
     name: 'auth',
     path: '/auth',
+    component: () => import('layouts/AuthLayout.vue'),
     meta: {
       requiresAuth: false,
     },
-    component: () => import('src/pages/auth/LoginPage.vue'),
+    children: [
+      {
+        path: '',
+        name: 'login',
+        component: () => import('src/components/auth/ss-loginForm/SsLoginForm.vue'),
+      },
+      {
+        path: 'forgot-password',
+        name: 'forgotPassword',
+        component: () =>
+          import('src/components/auth/ss-forgotPasswordForm/SsForgotPasswordForm.vue'),
+      },
+    ],
   },
 
-  {
-    path: '/not-authorized',
-    name: 'not-authorized',
-    component: () => import('src/pages/NotAuthorized.vue'),
-  },
-
-  // Always leave this as last one,
-  // but you can also remove it
   {
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorNotFound.vue'),

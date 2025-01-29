@@ -1,6 +1,5 @@
 <template>
   <q-card class="auth-card">
-    <img class="blue-separator" :src="blueSeparator" alt="" />
     <slot />
   </q-card>
 </template>
@@ -9,7 +8,7 @@
 
 <style scoped>
 .auth-card {
-  width: 530px;
+  width: fit-content;
   height: auto;
   padding: 40px 56px;
   border-radius: 20px;
