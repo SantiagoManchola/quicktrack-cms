@@ -101,7 +101,7 @@ const fetchCompanies = async () => {
     rows.value = response.data.data.data
   } catch (error) {
     console.error(error)
-    $q.notify({ type: 'negative', message: t('errorLoadingCompanies') })
+    $q.notify({ type: 'negative', message: t('errorLoadingCompanies') + ': ' + error.message })
   } finally {
     loading.value = false
   }

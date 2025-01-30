@@ -24,7 +24,7 @@
             icon="publish"
             no-caps
             flat
-            style="background: #a83d1a; color: white; border-radius: 8px"
+            class="upload-button"
             :label="$t('upload') + ' xlsx'"
           />
         </div>
@@ -125,9 +125,8 @@
     padding="8px 24px"
     no-caps
     flat
-    style="background: #701e0c; color: white; border-radius: 8px"
     :label="$t('download') + ' xlsx'"
-    class="bottom-button"
+    class="download-button"
   />
 </template>
 
@@ -165,17 +164,24 @@ const applySort = (column) => {
 }
 
 const filteredRows = computed(() => {
-  let rows = props.rows.filter((row) =>
-    Object.values(row).some((value) =>
-      String(value).toLowerCase().includes(search.value.toLowerCase()),
-    ),
-  )
+  let rows = props.rows
+
+  if (search.value) {
+    rows = rows.filter((row) =>
+      Object.values(row).some((value) =>
+        String(value).toLowerCase().includes(search.value.toLowerCase()),
+      ),
+    )
+  }
+
   if (activeFilter.value) {
     rows = rows.filter((row) => row[activeFilter.value])
   }
+
   if (activeSort.value) {
     rows = [...rows].sort((a, b) => (a[activeSort.value] > b[activeSort.value] ? 1 : -1))
   }
+
   return rows
 })
 
@@ -257,8 +263,17 @@ watch(selected, (newValue) => {
     }
   }
 }
-.bottom-button {
+.download-button {
   display: flex;
   justify-self: center;
+  background: #701e0c;
+  color: white;
+  border-radius: 8px;
+}
+
+.upload-button {
+  background: #a83d1a;
+  color: white;
+  border-radius: 8px;
 }
 </style>
