@@ -24,11 +24,21 @@
   }
 }
 
+.login-form {
+  .q-checkbox__bg {
+    border: 2px solid $secondary;
+    background-color: transparent !important;
+    .q-checkbox__svg {
+      color: $secondary;
+    }
+  }
+}
+
 .q-checkbox__bg {
-  border: 2px solid $secondary;
+  border: 2px solid $primary;
   background-color: transparent !important;
   .q-checkbox__svg {
-    color: $secondary;
+    color: $primary;
   }
 }
 
@@ -54,4 +64,34 @@ button {
 
 .bg-aside {
   background-color: #fffaf1;
+}
+
+.q-table {
+  thead {
+    tr {
+      .q-table--col-auto-width {
+        .q-checkbox {
+          display: none;
+        }
+      }
+    }
+  }
+}
+
+.q-table__top {
+  padding: 0 !important;
+}
+
+.q-table--col-auto-width {
+  padding-left: 0 !important;
+}
+
+.q-btn-dropdown__arrow {
+  margin-left: 20px !important;
+}
+
+.actions-container {
+  span {
+    font-weight: 300;
+  }
 }
