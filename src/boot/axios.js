@@ -2,12 +2,7 @@ import { defineBoot } from '#q-app/wrappers'
 import axios from 'axios'
 import { useAuthStore } from 'src/stores/auth'
 
-const isProduction = process.env.NODE_ENV === 'production'
-const apiBaseURL = isProduction
-  ? process.env.VUE_APP_QUASAR_API_URL_PROD
-  : process.env.VUE_APP_QUASAR_API_URL_DEV
-
-console.log('API Base URL:', apiBaseURL)
+const apiBaseURL = process.env.API
 
 const api = axios.create({
   baseURL: apiBaseURL,
