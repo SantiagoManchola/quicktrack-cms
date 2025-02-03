@@ -89,8 +89,8 @@ export default defineConfig((ctx) => {
       ],
       env: {
         API: ctx.dev
-          ? 'http://api-quicktrack.solucionsoft.com/v1'
-          : 'http://api-quicktrack.solucionsoft.com/v1',
+          ? 'https://api-quicktrack.solucionsoft.com/v1'
+          : 'https://api-quicktrack.solucionsoft.com/v1',
       },
     },
 
