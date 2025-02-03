@@ -25,6 +25,8 @@
         noCancel
         :confirmText="$t('next')"
         @onSubmit="handleRecoverPassword"
+        :loading="isLoading"
+        :disableConfirm="isLoading"
       />
 
       <div v-else class="confirmation-message">
