@@ -18,6 +18,15 @@ const recoverPassword = async (data) => {
   }
 }
 
+const resetPassword = async (data) => {
+  try {
+    const response = await api.post('auth/reset-password', data)
+    return response
+  } catch (error) {
+    throw error.response.data.message
+  }
+}
+
 export const useAuthService = () => {
-  return { login, recoverPassword }
+  return { login, recoverPassword, resetPassword }
 }

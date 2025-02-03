@@ -47,6 +47,14 @@ const routes = [
         component: () =>
           import('src/components/auth/ss-forgotPasswordForm/SsForgotPasswordForm.vue'),
       },
+      {
+        path: 'reset-password',
+        name: 'resetPassword',
+        component: () => import('src/components/auth/ss-resetPasswordForm/SsResetPasswordForm.vue'),
+        meta: {
+          background: 'reset-password-bg',
+        },
+      },
     ],
   },
 

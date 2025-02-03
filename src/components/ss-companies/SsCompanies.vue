@@ -11,15 +11,17 @@
     :tableActions="tableActions"
     :tableName="$t('companies')"
     :rowActions="rowActions"
+    :additionalActions="additionalActions"
   />
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, reactive } from 'vue'
 import SsTable from '../ss-table/SsTable.vue'
 import { useCompanyService } from 'src/services/company/useCompanyService'
-import { useQuasar } from 'quasar'
+import { Dialog, useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
+import SsPopUpForm from '../ss-popUpForm/SsPopUpForm.vue'
 
 const { t } = useI18n()
 const $q = useQuasar()
@@ -27,6 +29,85 @@ const companyService = useCompanyService()
 
 const rows = ref([])
 const loading = ref(false)
+
+const formData = reactive({
+  name: '',
+  email: '',
+  phone: '',
+  password: '',
+  nit: '',
+  number_licenses: '',
+  plan: '',
+})
+
+const inputs = [
+  {
+    label: t('name'),
+    key: 'name',
+    modelValue: ref(formData.name),
+    required: true,
+    dense: true,
+    placeholder: t('writeHere'),
+  },
+  {
+    label: t('nit'),
+    key: 'nit',
+    modelValue: ref(formData.nit),
+    required: true,
+    dense: true,
+    placeholder: t('writeHere'),
+    type: 'nit',
+  },
+  {
+    label: t('email'),
+    key: 'email',
+    modelValue: ref(formData.email),
+    required: true,
+    dense: true,
+    placeholder: t('writeHere'),
+    type: 'email',
+  },
+  {
+    label: t('phone'),
+    key: 'phone',
+    modelValue: ref(formData.phone),
+    required: true,
+    dense: true,
+    type: 'number',
+    placeholder: t('writeHere'),
+  },
+  {
+    label: t('password'),
+    key: 'password',
+    modelValue: ref(formData.password),
+    required: true,
+    dense: true,
+    type: 'password',
+    placeholder: '··········',
+  },
+  {
+    label: t('licensesNumber'),
+    key: 'number_licenses',
+    modelValue: ref(formData.number_licenses),
+    required: true,
+    dense: true,
+    type: 'number',
+    placeholder: t('writeHere'),
+  },
+  {
+    label: t('plan'),
+    key: 'plan',
+    modelValue: ref(formData.plan),
+    required: true,
+    dense: true,
+    type: 'select',
+    options: [
+      { label: 'Plan A', value: 'A' },
+      { label: 'Plan B', value: 'B' },
+      { label: 'Plan C', value: 'C' },
+    ],
+  },
+]
 
 const columns = [
   { name: 'id', label: 'Id', field: 'id', align: 'left' },
@@ -78,6 +159,43 @@ const rowActions = [
   },
 ]
 
+const addCompany = () => {
+  Object.keys(formData).forEach((key) => {
+    formData[key] = ''
+  })
+
+  Dialog.create({
+    component: SsPopUpForm,
+    componentProps: {
+      popUpTitle: t('addCompany'),
+      inputs: inputs,
+    },
+  })
+    .onOk(async (company, done) => {
+      try {
+        const response = await submitCompanyData(company)
+        if (response.status !== 200) {
+          throw new Error('Error creating company')
+        }
+        done(false)
+      } catch (error) {
+        console.error(error)
+      }
+    })
+    .onCancel(() => {
+      console.log('Cancel')
+    })
+}
+
+const additionalActions = [
+  {
+    label: t('addCompany'),
+    backgroundColor: '#50B5D7',
+    icon: 'o_library_add',
+    action: addCompany,
+  },
+]
+
 const handlePrintIndexes = (selectedRows) => {
   selectedRows.forEach((row) => {
     console.log(`Índice: ${row.id}, Empresa: ${row.name}`)
@@ -86,12 +204,29 @@ const handlePrintIndexes = (selectedRows) => {
 
 const editCompany = (row) => {
   console.log('Editar empresa:', row)
-  $q.notify({ type: 'info', message: `Editar empresa: ${row.name}` })
 }
 
 const deleteCompany = (row) => {
   console.log('Eliminar empresa:', row)
   $q.notify({ type: 'negative', message: `Eliminar empresa: ${row.name}` })
+}
+
+const submitCompanyData = async (formData) => {
+  try {
+    const response = await companyService.createCompany({
+      ...formData,
+      plan: formData.plan.value,
+    })
+    if (response && response.status === 200) {
+      $q.notify({ type: 'positive', message: t('companyCreated') })
+      fetchCompanies()
+    }
+    return response
+  } catch (error) {
+    console.error(error)
+    $q.notify({ type: 'negative', message: t('errorCreatingCompany') + ': ' + error })
+    return error
+  }
 }
 
 const fetchCompanies = async () => {
@@ -101,7 +236,7 @@ const fetchCompanies = async () => {
     rows.value = response.data.data.data
   } catch (error) {
     console.error(error)
-    $q.notify({ type: 'negative', message: t('errorLoadingCompanies') + ': ' + error.message })
+    $q.notify({ type: 'negative', message: t('errorLoadingCompanies') + ': ' + error })
   } finally {
     loading.value = false
   }

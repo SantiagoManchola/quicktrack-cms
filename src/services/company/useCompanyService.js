@@ -9,6 +9,16 @@ const getCompanies = async () => {
   }
 }
 
+const createCompany = async (company) => {
+  try {
+    const response = await api.post('admin/carriers', company)
+    return response
+  } catch (error) {
+    return error
+    /* throw error.response.data.message */
+  }
+}
+
 export const useCompanyService = () => {
-  return { getCompanies }
+  return { getCompanies, createCompany }
 }

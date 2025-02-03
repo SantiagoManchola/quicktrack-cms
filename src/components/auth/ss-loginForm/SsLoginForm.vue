@@ -12,7 +12,14 @@
 
     <span v-if="!isInactive" class="welcome-message">{{ $t('welcomeMessage') }}</span>
     <div v-if="!isInactive" class="login-form">
-      <SsForm :inputs="formInputs" :actions="formActions" :onSubmit="handleLogin" />
+      <SsForm
+        :inputs="formInputs"
+        @onSubmit="handleLogin"
+        noCancel
+        confirmText="login"
+        :loading="isLoading"
+        :disableConfirm="isLoading"
+      />
       <router-link class="link" :to="{ name: 'forgotPassword' }">{{
         $t('forgotPassword')
       }}</router-link>
@@ -62,18 +69,8 @@ const formInputs = [
   },
 ]
 
-const formActions = [
-  {
-    label: t('login'),
-    color: 'secondary',
-    flat: false,
-    disable: isLoading,
-    loading: isLoading,
-    type: 'submit',
-  },
-]
-
 const handleLogin = async () => {
+  if (isLoading.value) return
   isLoading.value = true
 
   try {

@@ -19,14 +19,29 @@
             </template>
           </q-input>
 
-          <q-btn
-            padding="8px 24px"
-            icon="publish"
-            no-caps
-            flat
-            class="upload-button"
-            :label="$t('upload') + ' xlsx'"
-          />
+          <div class="table-buttons">
+            <q-btn
+              padding="8px 24px"
+              icon="publish"
+              no-caps
+              flat
+              class="upload-button"
+              :label="$t('upload') + ' xlsx'"
+            />
+
+            <q-btn
+              v-for="action in additionalActions"
+              padding="8px 24px"
+              :key="action.label"
+              :icon="action.icon"
+              :label="action.label"
+              :color="action.color || 'primary'"
+              no-caps
+              :style="{ backgroundColor: action.backgroundColor + ' !important' }"
+              @click="action.action"
+              class="additional-action-button"
+            />
+          </div>
         </div>
 
         <div v-if="tableName" class="table-information">
@@ -145,6 +160,7 @@ const props = defineProps({
   tableActions: { type: Array, default: () => [] },
   tableName: { type: String, default: '' },
   rowActions: { type: Array, default: () => [] },
+  additionalActions: { type: Array, default: () => [] },
 })
 
 const search = ref('')
@@ -242,6 +258,13 @@ watch(selected, (newValue) => {
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 10px;
+    .table-buttons {
+      display: flex;
+      gap: 16px;
+      .additional-action-button {
+        border-radius: 8px;
+      }
+    }
   }
 
   .filter-container {

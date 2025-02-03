@@ -20,8 +20,11 @@
       <SsForm
         v-if="!isSubmitted"
         :inputs="formInputs"
+        actionsClass="ss-flex-end ss-sm-btn"
         :actions="formActions"
-        :onSubmit="handleRecoverPassword"
+        noCancel
+        :confirmText="$t('next')"
+        @onSubmit="handleRecoverPassword"
       />
 
       <div v-else class="confirmation-message">
@@ -57,18 +60,6 @@ const formInputs = [
   },
 ]
 
-const formActions = [
-  {
-    label: t('next'),
-    color: 'secondary',
-    flat: false,
-    disable: isLoading,
-    loading: isLoading,
-    type: 'submit',
-    class: 'sm justify-end',
-  },
-]
-
 const handleRecoverPassword = async () => {
   isLoading.value = true
 
@@ -81,7 +72,6 @@ const handleRecoverPassword = async () => {
       isSubmitted.value = true
     }
   } catch (error) {
-    isSubmitted.value = true
     console.error(t('errorMessage'), error)
     $q.notify({
       type: 'negative',

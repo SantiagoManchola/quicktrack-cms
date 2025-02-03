@@ -1,8 +1,23 @@
 <template>
   <div class="input-wrapper">
     <label v-if="type !== 'checkbox'" class="input-label">{{ label }}</label>
+
+    <q-select
+      v-if="type === 'select'"
+      v-model="internalValue"
+      :options="options"
+      :dense="dense"
+      :clearable="clearable"
+      :rules="computedRules"
+      outlined
+      :options-dense="denseOpts"
+      class="form-input"
+      dropdown-icon="keyboard_arrow_down"
+      :label="t('select')"
+    />
+
     <q-input
-      v-if="type !== 'checkbox'"
+      v-if="type !== 'checkbox' && type !== 'select'"
       v-model="internalValue"
       :type="computedType"
       :placeholder="placeholder"
@@ -23,7 +38,7 @@
         />
       </template>
     </q-input>
-    <div v-else class="checkbox-wrapper">
+    <div v-if="type === 'checkbox'" class="checkbox-wrapper">
       <q-checkbox v-model="internalValue" :label="label" :rules="computedRules" />
     </div>
   </div>
@@ -36,7 +51,7 @@ import { ref, watch, computed } from 'vue'
 const { t } = useI18n()
 
 const props = defineProps({
-  modelValue: [String, Number, Boolean],
+  modelValue: [String, Number, Boolean, Array],
   label: String,
   type: {
     type: String,
@@ -52,6 +67,10 @@ const props = defineProps({
     default: false,
   },
   required: Boolean,
+  options: {
+    type: Array,
+    default: () => [],
+  },
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -64,7 +83,10 @@ const togglePwdVisibility = () => {
 }
 
 const computedType = computed(() => {
-  return isPwd.value ? 'password' : 'text'
+  if (props.type === 'password') {
+    return isPwd.value ? 'password' : 'text'
+  }
+  return props.type === 'number' ? 'number' : props.type
 })
 
 const computedRules = computed(() => {
@@ -80,6 +102,9 @@ const computedRules = computed(() => {
       break
     case 'number':
       rules.push((val) => !isNaN(Number(val)) || t('invalidNumber'))
+      break
+    case 'nit':
+      rules.push((val) => /^[0-9]{7,10}(-[0-9]{1})?$/.test(val) || t('invalidNIT'))
       break
     default:
       break
