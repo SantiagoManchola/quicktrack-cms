@@ -14,8 +14,7 @@ const createCompany = async (company) => {
     const response = await api.post('admin/carriers', company)
     return response
   } catch (error) {
-    return error
-    /* throw error.response.data.message */
+    throw error.response.data.message
   }
 }
 

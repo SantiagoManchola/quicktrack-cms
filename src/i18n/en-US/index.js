@@ -62,4 +62,7 @@ export default {
   confirmPassword: 'Confirm password',
   set: 'Set',
   passwordsDoNotMatch: 'Passwords do not match',
+  errorCreatingCompany: 'Error creating company',
+  passwordTooShort: 'Password is too short',
+  companyCreated: 'Company created successfully',
 }

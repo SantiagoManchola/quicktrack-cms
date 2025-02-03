@@ -169,22 +169,9 @@ const addCompany = () => {
     componentProps: {
       popUpTitle: t('addCompany'),
       inputs: inputs,
+      onSubmit: submitCompanyData,
     },
   })
-    .onOk(async (company, done) => {
-      try {
-        const response = await submitCompanyData(company)
-        if (response.status !== 200) {
-          throw new Error('Error creating company')
-        }
-        done(false)
-      } catch (error) {
-        console.error(error)
-      }
-    })
-    .onCancel(() => {
-      console.log('Cancel')
-    })
 }
 
 const additionalActions = [
@@ -223,9 +210,8 @@ const submitCompanyData = async (formData) => {
     }
     return response
   } catch (error) {
-    console.error(error)
+    console.error(t('errorCreatingCompany'), error)
     $q.notify({ type: 'negative', message: t('errorCreatingCompany') + ': ' + error })
-    return error
   }
 }
 
@@ -235,7 +221,7 @@ const fetchCompanies = async () => {
     const response = await companyService.getCompanies()
     rows.value = response.data.data.data
   } catch (error) {
-    console.error(error)
+    console.error(t('errorLoadingCompanies'), error)
     $q.notify({ type: 'negative', message: t('errorLoadingCompanies') + ': ' + error })
   } finally {
     loading.value = false

@@ -59,4 +59,7 @@ export default {
   confirmPassword: 'Confirmar contraseña',
   set: 'Establecer',
   passwordsDoNotMatch: 'Las contraseñas no coinciden',
+  errorCreatingCompany: 'Error creando empresa',
+  passwordTooShort: 'La contraseña es muy corta',
+  companyCreated: 'Empresa creada exitosamente',
 }

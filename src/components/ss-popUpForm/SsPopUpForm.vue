@@ -14,6 +14,7 @@
             :actions="props.actions"
             @onSubmit="onOKClick"
             @onCancel="onCancelClick"
+            :loading="loading"
           />
         </div>
       </div>
@@ -22,6 +23,7 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { useDialogPluginComponent } from 'quasar'
 import SsForm from '../ss-form/SsForm.vue'
 
@@ -36,12 +38,33 @@ defineEmits([...useDialogPluginComponent.emits])
 
 const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginComponent()
 
+const loading = ref(false)
+
 function onCancelClick() {
-  onDialogCancel()
+  if (!loading.value) {
+    onDialogCancel()
+  }
 }
 
-function onOKClick(companyData) {
-  onDialogOK(companyData)
+async function onOKClick(formData) {
+  if (!props.onSubmit) {
+    return
+  }
+
+  loading.value = true
+
+  try {
+    const response = await props.onSubmit(formData)
+
+    if (response && response.status === 200) {
+      onDialogOK()
+      props.inputs.forEach((input) => (input.modelValue = ''))
+    }
+  } catch (error) {
+    console.error(error)
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 
@@ -52,7 +75,6 @@ function onOKClick(companyData) {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(10px);
   display: flex;
   justify-content: center;
