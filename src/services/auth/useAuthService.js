@@ -2,7 +2,6 @@ import { api } from 'src/boot/axios'
 
 const login = async (data) => {
   try {
-    console.log(data)
     const response = await api.post('auth/login', data)
     console.log('Login response:', response)
     return response

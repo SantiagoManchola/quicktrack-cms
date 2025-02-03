@@ -3,6 +3,7 @@ import axios from 'axios'
 import { useAuthStore } from 'src/stores/auth'
 
 const apiBaseURL = process.env.API
+console.log('API:', apiBaseURL)
 
 const api = axios.create({
   baseURL: apiBaseURL,
