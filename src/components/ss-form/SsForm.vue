@@ -79,7 +79,6 @@ const validateForm = () => {
   formValid.value = true
   props.inputs.forEach((input) => {
     if (input.required && !input.modelValue) {
-      console.log('input is required', input)
       formValid.value = false
     }
   })
