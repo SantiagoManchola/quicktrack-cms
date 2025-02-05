@@ -107,7 +107,7 @@ const computedRules = computed(() => {
       rules.push((val) => /^[0-9]{7,10}(-[0-9]{1})?$/.test(val) || t('invalidNIT'))
       break
     case 'password':
-      rules.push((val) => (val && val.length >= 8) || t('passwordTooShort'))
+      rules.push((val) => (val && val.length >= 6) || t('passwordTooShort'))
       break
     default:
       break

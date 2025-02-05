@@ -4,11 +4,16 @@
     :rows="filteredRows"
     :columns="columns"
     row-key="id"
-    v-model:pagination="pagination"
     :loading="loading"
     :selection="selectable ? 'multiple' : 'none'"
     v-model:selected="selected"
     class="q-pa-md"
+    :pagination="pagination"
+    @request="handlePagination"
+    :rows-per-page-label="rowsPerPageLabel"
+    :pagination-label="paginationLabel"
+    :rows-per-page-options="[5, 10, 20, 50]"
+    :no-data-label="$t('noData')"
   >
     <template v-slot:top>
       <div class="top-table-container">
@@ -147,11 +152,16 @@
 
 <script setup>
 import { ref, computed, defineProps, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps({
   rows: Array,
   columns: Array,
   loading: Boolean,
+  pagination: Object,
+  rowsPerPageLabel: String,
   filters: { type: Array, default: () => [] },
   sortableColumns: { type: Array, default: () => [] },
   selectable: { type: Boolean, default: false },
@@ -163,8 +173,18 @@ const props = defineProps({
   additionalActions: { type: Array, default: () => [] },
 })
 
+const emit = defineEmits(['update:pagination'])
+
+const handlePagination = (props) => {
+  emit('update:pagination', props.pagination)
+}
+
+const paginationLabel = (firstRowIndex, endRowIndex, totalRowsNumber) => {
+  return `${firstRowIndex}-${endRowIndex} ${t('paginationOf')} ${totalRowsNumber}`
+}
+
 const search = ref('')
-const pagination = ref({ rowsPerPage: 10 })
+
 const selected = ref([])
 const selectAll = ref(false)
 

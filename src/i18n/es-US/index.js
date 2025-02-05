@@ -62,4 +62,7 @@ export default {
   errorCreatingCompany: 'Error creando empresa',
   passwordTooShort: 'La contraseña es muy corta',
   companyCreated: 'Empresa creada exitosamente',
+  companiesPerPage: 'Empresas por página',
+  paginationOf: 'de',
+  noData: 'Sin datos',
 }

@@ -1,8 +1,8 @@
 import { api } from 'src/boot/axios'
 
-const getCompanies = async () => {
+const getCompanies = async ({ page, pageSize }) => {
   try {
-    const response = await api.get('admin/carriers')
+    const response = await api.get(`admin/carriers?page=${page}&pageSize=${pageSize}`)
     return response
   } catch (error) {
     throw error.response.data.message

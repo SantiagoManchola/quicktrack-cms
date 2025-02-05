@@ -1,5 +1,7 @@
 <template>
+  <q-spinner v-if="loading" color="primary" size="3em" :thickness="2" />
   <SsTable
+    v-else
     :rows="rows"
     :columns="columns"
     :loading="loading"
@@ -12,11 +14,14 @@
     :tableName="$t('companies')"
     :rowActions="rowActions"
     :additionalActions="additionalActions"
+    :pagination="pagination"
+    @update:pagination="updatePagination"
+    :rowsPerPageLabel="$t('companiesPerPage')"
   />
 </template>
 
 <script setup>
-import { ref, onMounted, computed, reactive } from 'vue'
+import { ref, computed, reactive, onMounted, watch } from 'vue'
 import SsTable from '../ss-table/SsTable.vue'
 import { useCompanyService } from 'src/services/company/useCompanyService'
 import { Dialog, useQuasar } from 'quasar'
@@ -29,6 +34,37 @@ const companyService = useCompanyService()
 
 const rows = ref([])
 const loading = ref(false)
+
+const pagination = ref({
+  page: 1,
+  rowsPerPage: 10,
+  rowsNumber: null,
+})
+
+const fetchCompanies = async () => {
+  loading.value = true
+  try {
+    const response = await companyService.getCompanies({
+      page: pagination.value.page,
+      pageSize: pagination.value.rowsPerPage,
+    })
+    rows.value = response.data.data.data
+    pagination.value.rowsNumber = response.data.data.totalItems
+  } catch (error) {
+    console.error(t('errorLoadingCompanies'), error)
+    $q.notify({ type: 'negative', message: t('errorLoadingCompanies') + ': ' + error })
+  } finally {
+    loading.value = false
+  }
+}
+
+watch(pagination, fetchCompanies, { deep: true })
+
+const updatePagination = (newPagination) => {
+  pagination.value = { ...pagination.value, ...newPagination }
+}
+
+onMounted(fetchCompanies)
 
 const formData = reactive({
   name: '',
@@ -214,19 +250,4 @@ const submitCompanyData = async (formData) => {
     $q.notify({ type: 'negative', message: t('errorCreatingCompany') + ': ' + error })
   }
 }
-
-const fetchCompanies = async () => {
-  loading.value = true
-  try {
-    const response = await companyService.getCompanies()
-    rows.value = response.data.data.data
-  } catch (error) {
-    console.error(t('errorLoadingCompanies'), error)
-    $q.notify({ type: 'negative', message: t('errorLoadingCompanies') + ': ' + error })
-  } finally {
-    loading.value = false
-  }
-}
-
-onMounted(fetchCompanies)
 </script>
