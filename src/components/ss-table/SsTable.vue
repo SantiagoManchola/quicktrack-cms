@@ -7,7 +7,7 @@
     :loading="loading"
     :selection="selectable ? 'multiple' : 'none'"
     v-model:selected="selected"
-    class="q-pa-md"
+    class="q-pa-md fit"
     :pagination="pagination"
     @request="handlePagination"
     :rows-per-page-label="rowsPerPageLabel"
@@ -126,15 +126,17 @@
       <q-td align="center">
         <q-btn
           v-for="action in rowActions"
-          :key="action.icon"
-          :icon="action.icon"
+          :key="typeof action.icon === 'function' ? action.icon(row) : action.icon"
+          :icon="typeof action.icon === 'function' ? action.icon(row) : action.icon"
           :color="action.color"
           dense
           flat
           round
           @click="action.action(row)"
         >
-          <q-tooltip>{{ action.tooltip }}</q-tooltip>
+          <q-tooltip>
+            {{ typeof action.tooltip === 'function' ? action.tooltip(row) : action.tooltip }}
+          </q-tooltip>
         </q-btn>
       </q-td>
     </template>

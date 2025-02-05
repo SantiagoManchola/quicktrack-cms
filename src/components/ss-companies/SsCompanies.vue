@@ -1,5 +1,10 @@
 <template>
-  <q-spinner v-if="loading" color="primary" size="3em" :thickness="2" />
+  <div
+    v-if="loading"
+    style="min-height: 100vh; display: flex; justify-content: center; align-items: center"
+  >
+    <q-spinner color="primary" size="3em" :thickness="2" />
+  </div>
   <SsTable
     v-else
     :rows="rows"
@@ -27,6 +32,7 @@ import { useCompanyService } from 'src/services/company/useCompanyService'
 import { Dialog, useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import SsPopUpForm from '../ss-popUpForm/SsPopUpForm.vue'
+import SsConfirmDialog from '../ss-confirmDialog/SsConfirmDialog.vue'
 
 const { t } = useI18n()
 const $q = useQuasar()
@@ -48,6 +54,7 @@ const fetchCompanies = async () => {
       page: pagination.value.page,
       pageSize: pagination.value.rowsPerPage,
     })
+
     rows.value = response.data.data.data
     pagination.value.rowsNumber = response.data.data.totalItems
   } catch (error) {
@@ -151,7 +158,6 @@ const columns = [
   { name: 'email', label: t('email'), field: 'email', sortable: true, align: 'left' },
   { name: 'nit', label: t('nit'), field: 'nit', align: 'left' },
   { name: 'numberLicenses', label: t('licensesNumber'), field: 'numberLicenses', align: 'left' },
-  { name: 'active', label: t('active'), field: 'active', align: 'left' },
   { name: 'actions', label: t('actions'), field: 'actions', align: 'center' },
 ]
 
@@ -182,18 +188,120 @@ const tableActions = computed(() => [
 
 const rowActions = [
   {
-    icon: 'o_no_accounts',
+    icon: (row) => (row.active ? 'o_no_accounts' : 'o_account_circle'),
     color: 'primary',
-    action: (row) => editCompany(row),
-    tooltip: t('enableDisable'),
+    action: (row) => toggleUserStatus(row),
+    tooltip: (row) => (row.active ? t('deactivate') : t('activate')),
   },
   {
     icon: 'o_delete',
     color: 'primary',
-    action: (row) => deleteCompany(row),
+    action: (row) => confirmDelete(row),
     tooltip: t('delete'),
   },
+  {
+    icon: 'o_edit',
+    color: 'primary',
+    action: (row) => editCompany(row),
+    tooltip: t('edit'),
+  },
 ]
+
+const editCompany = (row) => {
+  const initialFormData = { ...row }
+  const editInputs = inputs.map((input) => ({
+    ...input,
+    modelValue: ref(initialFormData[input.key]),
+  }))
+
+  Dialog.create({
+    component: SsPopUpForm,
+    componentProps: {
+      popUpTitle: t('editCompany'),
+      confirmText: 'edit',
+      inputs: editInputs,
+      onSubmit: (editedData) => submitEditedCompanyData(row.id, editedData, initialFormData),
+    },
+  })
+}
+
+const submitEditedCompanyData = async (id, editedData, initialFormData) => {
+  const changes = {}
+  Object.keys(editedData).forEach((key) => {
+    if (editedData[key] !== initialFormData[key]) {
+      changes[key] = editedData[key]
+    }
+  })
+
+  if (Object.keys(changes).length === 0) {
+    $q.notify({ type: 'info', message: t('noChangesDetected') })
+    return
+  }
+
+  try {
+    const response = await companyService.editCompany(id, changes)
+    if (response && response.status === 200) {
+      $q.notify({ type: 'positive', message: t('companyUpdated') })
+      fetchCompanies()
+    }
+    return response
+  } catch (error) {
+    console.error(t('errorUpdatingCompany'), error)
+    $q.notify({ type: 'negative', message: t('errorUpdatingCompany') + ': ' + error })
+  }
+}
+
+const toggleUserStatus = (row) => {
+  Dialog.create({
+    component: SsConfirmDialog,
+    componentProps: {
+      title: row.active
+        ? `${t('confirmDeactivateCompany')} ${row.name}`
+        : t('confirmActivateCompany', { user: row.name }),
+      message: row.active ? t('deactivateMessage') : t('activateMessage'),
+      confirmLabel: row.active ? t('deactivate') : t('activate'),
+      cancelLabel: t('cancel'),
+    },
+  }).onOk(() => {
+    handleToggleStatus(row)
+  })
+}
+
+const confirmDelete = (row) => {
+  Dialog.create({
+    component: SsConfirmDialog,
+    componentProps: {
+      title: `${t('confirmDeleteCompany')} ${row.name}`,
+      message: t('deleteWarning'),
+      confirmLabel: t('delete'),
+      cancelLabel: t('cancel'),
+    },
+  }).onOk(() => {
+    handleDelete(row)
+  })
+}
+
+const handleToggleStatus = async (row) => {
+  try {
+    await companyService.editCompany(row.id, { active: !row.active })
+    $q.notify({ type: 'positive', message: t('statusUpdated') })
+    fetchCompanies()
+  } catch (error) {
+    console.error(error)
+    $q.notify({ type: 'negative', message: t('errorUpdatingStatus') })
+  }
+}
+
+const handleDelete = async (row) => {
+  try {
+    await companyService.deleteCompany(row.id)
+    $q.notify({ type: 'positive', message: t('companyDeleted') })
+    fetchCompanies()
+  } catch (error) {
+    console.error(error)
+    $q.notify({ type: 'negative', message: t('errorDeletingCompany') })
+  }
+}
 
 const addCompany = () => {
   Object.keys(formData).forEach((key) => {
@@ -223,15 +331,6 @@ const handlePrintIndexes = (selectedRows) => {
   selectedRows.forEach((row) => {
     console.log(`Índice: ${row.id}, Empresa: ${row.name}`)
   })
-}
-
-const editCompany = (row) => {
-  console.log('Editar empresa:', row)
-}
-
-const deleteCompany = (row) => {
-  console.log('Eliminar empresa:', row)
-  $q.notify({ type: 'negative', message: `Eliminar empresa: ${row.name}` })
 }
 
 const submitCompanyData = async (formData) => {

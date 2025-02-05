@@ -15,6 +15,7 @@
             @onSubmit="onOKClick"
             @onCancel="onCancelClick"
             :loading="loading"
+            :confirmText="props.confirmText"
           />
         </div>
       </div>
@@ -32,6 +33,7 @@ const props = defineProps({
   inputs: Array,
   actions: Array,
   onSubmit: Function,
+  confirmText: String,
 })
 
 defineEmits([...useDialogPluginComponent.emits])
