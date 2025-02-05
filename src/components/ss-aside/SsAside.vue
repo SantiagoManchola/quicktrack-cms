@@ -56,7 +56,7 @@ const isActive = (routeName) => {
 }
 
 const roleRoutes = {
-  Admin: ['companies', 'vehicles', 'splashes'],
+  Admin: ['companies', 'vehiclesTypes', 'splashes'],
   Driver: ['dashboard'],
 }
 
@@ -78,7 +78,7 @@ const filteredLinksWithoutChildren = computed(() => {
 
 const links = ref([
   { name: t('companies'), icon: 'o_person', route: 'companies', childrens: [] },
-  { name: t('vehicles_types'), icon: 'o_garage', route: 'vehicles', childrens: [] },
+  { name: t('vehicles_types'), icon: 'o_garage', route: 'vehiclesTypes', childrens: [] },
   { name: t('splashes'), icon: 'o_switch_account', route: 'splashes', childrens: [] },
 ])
 </script>

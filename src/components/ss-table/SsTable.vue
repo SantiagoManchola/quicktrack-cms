@@ -12,7 +12,7 @@
     @request="handlePagination"
     :rows-per-page-label="rowsPerPageLabel"
     :pagination-label="paginationLabel"
-    :rows-per-page-options="[5, 10, 20, 50]"
+    :rows-per-page-options="rowsPerPageOptions"
     :no-data-label="$t('noData')"
   >
     <template v-slot:top>
@@ -173,6 +173,7 @@ const props = defineProps({
   tableName: { type: String, default: '' },
   rowActions: { type: Array, default: () => [] },
   additionalActions: { type: Array, default: () => [] },
+  rowsPerPageOptions: { type: Array, default: () => [10, 20, 50, 0] },
 })
 
 const emit = defineEmits(['update:pagination'])

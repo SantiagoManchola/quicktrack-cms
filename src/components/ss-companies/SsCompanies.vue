@@ -22,6 +22,7 @@
     :pagination="pagination"
     @update:pagination="updatePagination"
     :rowsPerPageLabel="$t('companiesPerPage')"
+    :rowsPerPageOptions="[10, 20, 0]"
   />
 </template>
 
@@ -34,10 +35,16 @@ import { useI18n } from 'vue-i18n'
 import SsPopUpForm from '../ss-popUpForm/SsPopUpForm.vue'
 import SsConfirmDialog from '../ss-confirmDialog/SsConfirmDialog.vue'
 
+// --------------------------------
+// 1. Initialization of dependencies
+// --------------------------------
 const { t } = useI18n()
 const $q = useQuasar()
 const companyService = useCompanyService()
 
+// --------------------------------
+// 2. Reactive state and variables
+// --------------------------------
 const rows = ref([])
 const loading = ref(false)
 
@@ -47,6 +54,38 @@ const pagination = ref({
   rowsNumber: null,
 })
 
+const formData = reactive({
+  name: '',
+  email: '',
+  phone: '',
+  password: '',
+  nit: '',
+  number_licenses: '',
+  plan: '',
+})
+
+// --------------------------------
+// 3. Table configuration
+// --------------------------------
+const columns = [
+  { name: 'id', label: 'Id', field: 'id', align: 'left' },
+  { name: 'name', label: t('name'), field: 'name', sortable: true, align: 'left' },
+  { name: 'email', label: t('email'), field: 'email', sortable: true, align: 'left' },
+  { name: 'nit', label: t('nit'), field: 'nit', align: 'left' },
+  { name: 'numberLicenses', label: t('licensesNumber'), field: 'numberLicenses', align: 'left' },
+  { name: 'actions', label: t('actions'), field: 'actions', align: 'center' },
+]
+
+const sortableColumns = columns.filter((col) => col.sortable)
+
+const filters = [
+  { label: t('actives'), value: 'true' },
+  { label: t('inactives'), value: 'false' },
+]
+
+// --------------------------------
+// 4. Business logic
+// --------------------------------
 const fetchCompanies = async () => {
   loading.value = true
   try {
@@ -65,147 +104,9 @@ const fetchCompanies = async () => {
   }
 }
 
-watch(pagination, fetchCompanies, { deep: true })
-
 const updatePagination = (newPagination) => {
   pagination.value = { ...pagination.value, ...newPagination }
 }
-
-onMounted(fetchCompanies)
-
-const formData = reactive({
-  name: '',
-  email: '',
-  phone: '',
-  password: '',
-  nit: '',
-  number_licenses: '',
-  plan: '',
-})
-
-const inputs = [
-  {
-    label: t('name'),
-    key: 'name',
-    modelValue: ref(formData.name),
-    required: true,
-    dense: true,
-    placeholder: t('writeHere'),
-  },
-  {
-    label: t('nit'),
-    key: 'nit',
-    modelValue: ref(formData.nit),
-    required: true,
-    dense: true,
-    placeholder: t('writeHere'),
-    type: 'nit',
-  },
-  {
-    label: t('email'),
-    key: 'email',
-    modelValue: ref(formData.email),
-    required: true,
-    dense: true,
-    placeholder: t('writeHere'),
-    type: 'email',
-  },
-  {
-    label: t('phone'),
-    key: 'phone',
-    modelValue: ref(formData.phone),
-    required: true,
-    dense: true,
-    type: 'number',
-    placeholder: t('writeHere'),
-  },
-  {
-    label: t('password'),
-    key: 'password',
-    modelValue: ref(formData.password),
-    required: true,
-    dense: true,
-    type: 'password',
-    placeholder: '··········',
-  },
-  {
-    label: t('licensesNumber'),
-    key: 'number_licenses',
-    modelValue: ref(formData.number_licenses),
-    required: true,
-    dense: true,
-    type: 'number',
-    placeholder: t('writeHere'),
-  },
-  {
-    label: t('plan'),
-    key: 'plan',
-    modelValue: ref(formData.plan),
-    required: true,
-    dense: true,
-    type: 'select',
-    options: [
-      { label: 'Plan A', value: 'A' },
-      { label: 'Plan B', value: 'B' },
-      { label: 'Plan C', value: 'C' },
-    ],
-  },
-]
-
-const columns = [
-  { name: 'id', label: 'Id', field: 'id', align: 'left' },
-  { name: 'name', label: t('name'), field: 'name', sortable: true, align: 'left' },
-  { name: 'email', label: t('email'), field: 'email', sortable: true, align: 'left' },
-  { name: 'nit', label: t('nit'), field: 'nit', align: 'left' },
-  { name: 'numberLicenses', label: t('licensesNumber'), field: 'numberLicenses', align: 'left' },
-  { name: 'actions', label: t('actions'), field: 'actions', align: 'center' },
-]
-
-const sortableColumns = columns.filter((col) => col.sortable)
-
-const filters = [
-  { label: t('actives'), value: 'true' },
-  { label: t('inactives'), value: 'false' },
-]
-
-const tableActions = computed(() => [
-  {
-    label: t('deactivateCompanies'),
-    icon: 'o_no_accounts',
-    action: handlePrintIndexes,
-  },
-  {
-    label: t('activateCompanies'),
-    icon: 'o_account_circle',
-    action: handlePrintIndexes,
-  },
-  {
-    label: t('deleteCompanies'),
-    icon: 'o_delete',
-    action: handlePrintIndexes,
-  },
-])
-
-const rowActions = [
-  {
-    icon: (row) => (row.active ? 'o_no_accounts' : 'o_account_circle'),
-    color: 'primary',
-    action: (row) => toggleUserStatus(row),
-    tooltip: (row) => (row.active ? t('deactivate') : t('activate')),
-  },
-  {
-    icon: 'o_delete',
-    color: 'primary',
-    action: (row) => confirmDelete(row),
-    tooltip: t('delete'),
-  },
-  {
-    icon: 'o_edit',
-    color: 'primary',
-    action: (row) => editCompany(row),
-    tooltip: t('edit'),
-  },
-]
 
 const editCompany = (row) => {
   const initialFormData = { ...row }
@@ -318,21 +219,6 @@ const addCompany = () => {
   })
 }
 
-const additionalActions = [
-  {
-    label: t('addCompany'),
-    backgroundColor: '#50B5D7',
-    icon: 'o_library_add',
-    action: addCompany,
-  },
-]
-
-const handlePrintIndexes = (selectedRows) => {
-  selectedRows.forEach((row) => {
-    console.log(`Índice: ${row.id}, Empresa: ${row.name}`)
-  })
-}
-
 const submitCompanyData = async (formData) => {
   try {
     const response = await companyService.createCompany({
@@ -349,4 +235,141 @@ const submitCompanyData = async (formData) => {
     $q.notify({ type: 'negative', message: t('errorCreatingCompany') + ': ' + error })
   }
 }
+
+// --------------------------------
+// 5. Table actions
+// --------------------------------
+
+const tableActions = computed(() => [
+  {
+    label: t('deactivateCompanies'),
+    icon: 'o_no_accounts',
+    action: handlePrintIndexes,
+  },
+  {
+    label: t('activateCompanies'),
+    icon: 'o_account_circle',
+    action: handlePrintIndexes,
+  },
+  {
+    label: t('deleteCompanies'),
+    icon: 'o_delete',
+    action: handlePrintIndexes,
+  },
+])
+
+const rowActions = [
+  {
+    icon: (row) => (row.active ? 'o_no_accounts' : 'o_account_circle'),
+    color: 'primary',
+    action: (row) => toggleUserStatus(row),
+    tooltip: (row) => (row.active ? t('deactivate') : t('activate')),
+  },
+  {
+    icon: 'o_delete',
+    color: 'primary',
+    action: (row) => confirmDelete(row),
+    tooltip: t('delete'),
+  },
+  {
+    icon: 'o_edit',
+    color: 'primary',
+    action: (row) => editCompany(row),
+    tooltip: t('edit'),
+  },
+]
+
+const additionalActions = [
+  {
+    label: t('addCompany'),
+    backgroundColor: '#50B5D7',
+    icon: 'o_library_add',
+    action: addCompany,
+  },
+]
+
+const handlePrintIndexes = (selectedRows) => {
+  selectedRows.forEach((row) => {
+    console.log(`Índice: ${row.id}, Empresa: ${row.name}`)
+  })
+}
+
+// --------------------------------
+// 6. Form inputs configuration
+// --------------------------------
+
+const inputs = [
+  {
+    label: t('name'),
+    key: 'name',
+    modelValue: ref(formData.name),
+    required: true,
+    dense: true,
+    placeholder: t('writeHere'),
+  },
+  {
+    label: t('nit'),
+    key: 'nit',
+    modelValue: ref(formData.nit),
+    required: true,
+    dense: true,
+    placeholder: t('writeHere'),
+    type: 'nit',
+  },
+  {
+    label: t('email'),
+    key: 'email',
+    modelValue: ref(formData.email),
+    required: true,
+    dense: true,
+    placeholder: t('writeHere'),
+    type: 'email',
+  },
+  {
+    label: t('phone'),
+    key: 'phone',
+    modelValue: ref(formData.phone),
+    required: true,
+    dense: true,
+    type: 'number',
+    placeholder: t('writeHere'),
+  },
+  {
+    label: t('password'),
+    key: 'password',
+    modelValue: ref(formData.password),
+    required: true,
+    dense: true,
+    type: 'password',
+    placeholder: '··········',
+  },
+  {
+    label: t('licensesNumber'),
+    key: 'number_licenses',
+    modelValue: ref(formData.number_licenses),
+    required: true,
+    dense: true,
+    type: 'number',
+    placeholder: t('writeHere'),
+  },
+  {
+    label: t('plan'),
+    key: 'plan',
+    modelValue: ref(formData.plan),
+    required: true,
+    dense: true,
+    type: 'select',
+    options: [
+      { label: 'Plan A', value: 'A' },
+      { label: 'Plan B', value: 'B' },
+      { label: 'Plan C', value: 'C' },
+    ],
+  },
+]
+
+// --------------------------------
+// 7. Lifecycle and watchers
+// --------------------------------
+onMounted(fetchCompanies)
+watch(pagination, fetchCompanies, { deep: true })
 </script>

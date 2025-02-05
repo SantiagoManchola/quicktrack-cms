@@ -14,8 +14,8 @@ const routes = [
         meta: { requiresAuth: true, role: 'Admin' },
       },
       {
-        path: 'vehicles',
-        name: 'vehicles',
+        path: 'vehicle-types',
+        name: 'vehiclesTypes',
         component: () => import('src/components/ss-vehicles/SsVehicles.vue'),
         meta: { requiresAuth: true, role: 'Admin' },
       },
