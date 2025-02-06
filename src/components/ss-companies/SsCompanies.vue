@@ -30,6 +30,7 @@
 import { ref, computed, reactive, onMounted, watch } from 'vue'
 import SsTable from '../ss-table/SsTable.vue'
 import { useCompanyService } from 'src/services/company/useCompanyService'
+import { usePlansService } from 'src/services/plans/usePlansService'
 import { Dialog, useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import SsPopUpForm from '../ss-popUpForm/SsPopUpForm.vue'
@@ -41,12 +42,15 @@ import SsConfirmDialog from '../ss-confirmDialog/SsConfirmDialog.vue'
 const { t } = useI18n()
 const $q = useQuasar()
 const companyService = useCompanyService()
+const plansService = usePlansService()
 
 // --------------------------------
 // 2. Reactive state and variables
 // --------------------------------
 const rows = ref([])
 const loading = ref(false)
+const plans = ref([])
+const loadingPlans = ref(false)
 
 const pagination = ref({
   page: 1,
@@ -61,7 +65,7 @@ const formData = reactive({
   password: '',
   nit: '',
   number_licenses: '',
-  plan: '',
+  plan_id: '',
 })
 
 // --------------------------------
@@ -104,16 +108,48 @@ const fetchCompanies = async () => {
   }
 }
 
+const fetchPlans = async () => {
+  if (plans.value.length > 0) return
+  loadingPlans.value = true
+  try {
+    const response = await plansService.getPlans()
+    plans.value = response.data.data.data.map((plan) => ({
+      label: plan.name,
+      value: plan.id,
+    }))
+  } catch (error) {
+    console.error(t('errorLoadingPlans'), error)
+    $q.notify({ type: 'negative', message: t('errorLoadingPlans') + ': ' + error })
+  }
+}
+
 const updatePagination = (newPagination) => {
   pagination.value = { ...pagination.value, ...newPagination }
 }
 
-const editCompany = (row) => {
+const editCompany = async (row) => {
+  if (plans.value.length === 0) {
+    await fetchPlans()
+  }
+
   const initialFormData = { ...row }
-  const editInputs = inputs.map((input) => ({
-    ...input,
-    modelValue: ref(initialFormData[input.key]),
-  }))
+
+  if (row.plan && row.plan.id && row.plan.name) {
+    initialFormData.plan_id = {
+      label: row.plan.name,
+      value: row.plan.id,
+    }
+  } else {
+    initialFormData.plan_id = null
+  }
+
+  const editInputs = inputs
+    .filter((input) => input.key !== 'phone' && input.key !== 'password')
+    .map((input) => ({
+      ...input,
+      modelValue: ref(initialFormData[input.key]),
+      ...(input.key === 'plan_id' ? { options: plans.value } : {}),
+    }))
 
   Dialog.create({
     component: SsPopUpForm,
@@ -129,14 +165,24 @@ const editCompany = (row) => {
 const submitEditedCompanyData = async (id, editedData, initialFormData) => {
   const changes = {}
   Object.keys(editedData).forEach((key) => {
-    if (editedData[key] !== initialFormData[key]) {
-      changes[key] = editedData[key]
+    if (key === 'plan_id') {
+      if (editedData[key]?.value !== initialFormData[key]?.value) {
+        changes[key] = editedData[key]
+      }
+    } else {
+      if (editedData[key] !== initialFormData[key]) {
+        changes[key] = editedData[key]
+      }
     }
   })
 
   if (Object.keys(changes).length === 0) {
     $q.notify({ type: 'info', message: t('noChangesDetected') })
     return
+  }
+
+  if (changes.plan_id && changes.plan_id.value) {
+    changes.plan_id = changes.plan_id.value
   }
 
   try {
@@ -204,27 +250,39 @@ const handleDelete = async (row) => {
   }
 }
 
-const addCompany = () => {
+const addCompany = async () => {
   Object.keys(formData).forEach((key) => {
     formData[key] = ''
   })
+
+  if (plans.value.length === 0) {
+    await fetchPlans()
+  }
+
+  const updatedInputs = inputs.map((input) => ({
+    ...input,
+    modelValue: ref(formData[input.key]),
+    ...(input.key === 'plan_id' ? { options: plans.value } : {}),
+  }))
 
   Dialog.create({
     component: SsPopUpForm,
     componentProps: {
       popUpTitle: t('addCompany'),
-      inputs: inputs,
+      inputs: updatedInputs,
       onSubmit: submitCompanyData,
     },
   })
 }
 
 const submitCompanyData = async (formData) => {
+  const dataToSend = {
+    ...formData,
+    number_licenses: Number(formData.number_licenses),
+    plan_id: formData.plan_id.value,
+  }
   try {
-    const response = await companyService.createCompany({
-      ...formData,
-      plan: formData.plan.value,
-    })
+    const response = await companyService.createCompany(dataToSend)
     if (response && response.status === 200) {
       $q.notify({ type: 'positive', message: t('companyCreated') })
       fetchCompanies()
@@ -354,22 +412,21 @@ const inputs = [
   },
   {
     label: t('plan'),
-    key: 'plan',
-    modelValue: ref(formData.plan),
+    key: 'plan_id',
+    modelValue: ref(formData.plan_id),
     required: true,
     dense: true,
     type: 'select',
-    options: [
-      { label: 'Plan A', value: 'A' },
-      { label: 'Plan B', value: 'B' },
-      { label: 'Plan C', value: 'C' },
-    ],
+    options: plans,
+    onPopupShow: fetchPlans,
   },
 ]
 
 // --------------------------------
 // 7. Lifecycle and watchers
 // --------------------------------
-onMounted(fetchCompanies)
+onMounted(() => {
+  fetchCompanies()
+})
 watch(pagination, fetchCompanies, { deep: true })
 </script>

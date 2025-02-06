@@ -94,4 +94,5 @@ export default {
   vehicleTypeCreated: 'Tipo de vehículo creado exitosamente',
   errorCreatingVehicleType: 'Error creando tipo de vehículo',
   vehicleTypeUpdated: 'Tipo de vehículo actualizado exitosamente',
+  errorLoadingPlans: 'Error cargando planes',
 }

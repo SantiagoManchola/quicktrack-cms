@@ -14,6 +14,7 @@
       class="form-input"
       dropdown-icon="keyboard_arrow_down"
       :label="t('select')"
+      @popup-show="onPopupShow ? onPopupShow : () => {}"
     />
 
     <q-input
@@ -71,6 +72,7 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  onPopupShow: Function,
 })
 
 const emit = defineEmits(['update:modelValue'])
