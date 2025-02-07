@@ -10,7 +10,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { useCompanyService } from 'src/services/company/useCompanyService'
+import { useCompanyService } from 'src/services/companies/useCompanyService'
 
 const route = useRoute()
 const companyService = useCompanyService()

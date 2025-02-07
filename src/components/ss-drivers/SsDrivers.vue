@@ -16,12 +16,12 @@
     :showUpload="true"
     :showDownload="true"
     :tableActions="tableActions"
-    :tableName="$t('companies')"
+    :tableName="$t('drivers')"
     :rowActions="rowActions"
     :additionalActions="additionalActions"
     :pagination="pagination"
     @update:pagination="updatePagination"
-    :rowsPerPageLabel="$t('companiesPerPage')"
+    :rowsPerPageLabel="$t('driversPerPage')"
     :rowsPerPageOptions="[10, 20, 0]"
   />
 </template>
@@ -29,8 +29,8 @@
 <script setup>
 import { ref, computed, reactive, onMounted, watch } from 'vue'
 import SsTable from '../ss-table/SsTable.vue'
-import { useCompanyService } from 'src/services/companies/useCompanyService'
-import { usePlansService } from 'src/services/plans/usePlansService'
+import { useDriverService } from 'src/services/drivers/useDriverService'
+import { useVehicleService } from 'src/services/vehicles/useVehicleService'
 import { Dialog, useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import SsPopUpForm from '../ss-popUpForm/SsPopUpForm.vue'
@@ -41,16 +41,16 @@ import SsConfirmDialog from '../ss-confirmDialog/SsConfirmDialog.vue'
 // --------------------------------
 const { t } = useI18n()
 const $q = useQuasar()
-const companyService = useCompanyService()
-const plansService = usePlansService()
+const driverService = useDriverService()
+const vehicleService = useVehicleService()
 
 // --------------------------------
 // 2. Reactive state and variables
 // --------------------------------
 const rows = ref([])
 const loading = ref(false)
-const plans = ref([])
-const loadingPlans = ref(false)
+const vehicles = ref([])
+const loadingVehicles = ref(false)
 
 const pagination = ref({
   page: 1,
@@ -63,20 +63,35 @@ const formData = reactive({
   email: '',
   phone: '',
   password: '',
-  nit: '',
-  number_licenses: '',
-  plan_id: '',
+  identification: '',
 })
 
 // --------------------------------
 // 3. Table configuration
 // --------------------------------
 const columns = [
-  { name: 'id', label: 'Id', field: 'id', align: 'left' },
+  { name: 'identification', label: t('identification'), field: 'identification', align: 'left' },
   { name: 'name', label: t('name'), field: 'name', sortable: true, align: 'left' },
   { name: 'email', label: t('email'), field: 'email', sortable: true, align: 'left' },
-  { name: 'nit', label: t('nit'), field: 'nit', align: 'left' },
-  { name: 'number_licenses', label: t('licensesNumber'), field: 'number_licenses', align: 'left' },
+  { name: 'phone', label: t('phone'), field: 'phone', align: 'left' },
+  {
+    name: 'brand',
+    label: t('brand'),
+    field: (row) => (row.vehicle ? row.vehicle.brand : t('noVehicle')),
+    align: 'left',
+  },
+  {
+    name: 'model',
+    label: t('model'),
+    field: (row) => (row.vehicle ? row.vehicle.model : t('noVehicle')),
+    align: 'left',
+  },
+  {
+    name: 'plate',
+    label: t('plate'),
+    field: (row) => (row.vehicle ? row.vehicle.plate : t('noVehicle')),
+    align: 'left',
+  },
   { name: 'actions', label: t('actions'), field: 'actions', align: 'center' },
 ]
 
@@ -90,10 +105,10 @@ const filters = [
 // --------------------------------
 // 4. Business logic
 // --------------------------------
-const fetchCompanies = async () => {
+const fetchDrivers = async () => {
   loading.value = true
   try {
-    const response = await companyService.getCompanies({
+    const response = await driverService.getDrivers({
       page: pagination.value.page,
       pageSize: pagination.value.rowsPerPage,
     })
@@ -101,25 +116,25 @@ const fetchCompanies = async () => {
     rows.value = response.data.data.data
     pagination.value.rowsNumber = response.data.data.totalItems
   } catch (error) {
-    console.error(t('errorLoadingCompanies'), error)
-    $q.notify({ type: 'negative', message: t('errorLoadingCompanies') + ': ' + error })
+    console.error(t('errorLoadingDrivers'), error)
+    $q.notify({ type: 'negative', message: t('errorLoadingDrivers') + ': ' + error })
   } finally {
     loading.value = false
   }
 }
 
-const fetchPlans = async () => {
-  if (plans.value.length > 0) return
-  loadingPlans.value = true
+const fetchVehicles = async () => {
+  if (vehicles.value.length > 0) return
+  loadingVehicles.value = true
   try {
-    const response = await plansService.getPlans()
-    plans.value = response.data.data.data.map((plan) => ({
-      label: plan.name,
-      value: plan.id,
+    const response = await vehicleService.getVehicles()
+    vehicles.value = response.data.data.data.map((vehicle) => ({
+      label: vehicle.license_plate,
+      value: vehicle.id,
     }))
   } catch (error) {
-    console.error(t('errorLoadingPlans'), error)
-    $q.notify({ type: 'negative', message: t('errorLoadingPlans') + ': ' + error })
+    console.error(t('errorLoadingVehicles'), error)
+    $q.notify({ type: 'negative', message: t('errorLoadingVehicles') + ': ' + error })
   }
 }
 
@@ -127,45 +142,45 @@ const updatePagination = (newPagination) => {
   pagination.value = { ...pagination.value, ...newPagination }
 }
 
-const editCompany = async (row) => {
-  if (plans.value.length === 0) {
-    await fetchPlans()
+const editDriver = async (row) => {
+  if (vehicles.value.length === 0) {
+    await fetchVehicles()
   }
 
   const initialFormData = { ...row }
 
-  if (row.plan && row.plan.id && row.plan.name) {
-    initialFormData.plan_id = {
-      label: row.plan.name,
-      value: row.plan.id,
+  if (row.vehicle && row.vehicle.id && row.vehicle.plate) {
+    initialFormData.vehicle_id = {
+      label: row.vehicle.plate,
+      value: row.vehicle.id,
     }
   } else {
-    initialFormData.plan_id = null
+    initialFormData.vehicle_id = null
   }
 
   const editInputs = inputs
-    .filter((input) => input.key !== 'phone' && input.key !== 'password')
+    .filter((input) => input.key !== 'password')
     .map((input) => ({
       ...input,
       modelValue: ref(initialFormData[input.key]),
-      ...(input.key === 'plan_id' ? { options: plans.value } : {}),
+      ...(input.key === 'vehicle_id' ? { options: vehicles.value } : {}),
     }))
 
   Dialog.create({
     component: SsPopUpForm,
     componentProps: {
-      popUpTitle: t('editCompany'),
+      popUpTitle: t('editDriver'),
       confirmText: 'edit',
       inputs: editInputs,
-      onSubmit: (editedData) => submitEditedCompanyData(row.id, editedData, initialFormData),
+      onSubmit: (editedData) => submitEditedDriverData(row.id, editedData, initialFormData),
     },
   })
 }
 
-const submitEditedCompanyData = async (id, editedData, initialFormData) => {
+const submitEditedDriverData = async (id, editedData, initialFormData) => {
   const changes = {}
   Object.keys(editedData).forEach((key) => {
-    if (key === 'plan_id') {
+    if (key === 'vehicle_id') {
       if (editedData[key]?.value !== initialFormData[key]?.value) {
         changes[key] = editedData[key]
       }
@@ -181,44 +196,47 @@ const submitEditedCompanyData = async (id, editedData, initialFormData) => {
     return
   }
 
-  if (changes.plan_id && changes.plan_id.value) {
-    changes.plan_id = changes.plan_id.value
+  if (changes.vehicle_id && changes.vehicle_id.value) {
+    changes.vehicle_id = changes.vehicle_id.value
   }
 
   try {
-    const response = await companyService.editCompany(id, changes)
+    const response = await driverService.editDriver(id, changes)
     if (response && response.status === 200) {
-      $q.notify({ type: 'positive', message: t('companyUpdated') })
-      fetchCompanies()
+      $q.notify({ type: 'positive', message: t('driverUpdated') })
+      fetchDrivers()
     }
     return response
   } catch (error) {
-    console.error(t('errorUpdatingCompany'), error)
-    $q.notify({ type: 'negative', message: t('errorUpdatingCompany') + ': ' + error })
+    console.error(t('errorUpdatingDriver'), error)
+    $q.notify({ type: 'negative', message: t('errorUpdatingDriver') + ': ' + error })
   }
 }
 
-const toggleUserStatus = (row) => {
-  Dialog.create({
-    component: SsConfirmDialog,
-    componentProps: {
-      title: row.active
-        ? `${t('confirmDeactivateCompany')} ${row.name}`
-        : t('confirmActivateCompany', { user: row.name }),
-      message: row.active ? t('deactivateMessage') : t('activateMessage'),
-      confirmLabel: row.active ? t('deactivate') : t('activate'),
-      cancelLabel: t('cancel'),
-    },
-  }).onOk(() => {
-    handleToggleStatus(row)
-  })
+//TODO: attach and detach vehicle
+const toggleVehicleAssignment = async (row) => {
+  if (row.vehicle) {
+    Dialog.create({
+      component: SsConfirmDialog,
+      componentProps: {
+        title: t('confirmUnassignVehicle'),
+        message: t('unassignVehicleMessage', { user: row.name }),
+        confirmLabel: t('unassign'),
+        cancelLabel: t('cancel'),
+      },
+    }).onOk(async () => {
+      await handleAssignVehicle(row, null)
+    })
+  } else {
+    editDriver(row)
+  }
 }
 
 const confirmDelete = (row) => {
   Dialog.create({
     component: SsConfirmDialog,
     componentProps: {
-      title: `${t('confirmDeleteCompany')} ${row.name}`,
+      title: `${t('confirmDeleteDriver')} ${row.name}`,
       message: t('deleteWarning'),
       confirmLabel: t('delete'),
       cancelLabel: t('cancel'),
@@ -228,68 +246,74 @@ const confirmDelete = (row) => {
   })
 }
 
-const handleToggleStatus = async (row) => {
+const handleAssignVehicle = async (row, vehicleId) => {
   try {
-    await companyService.editCompany(row.id, { active: !row.active })
-    $q.notify({ type: 'positive', message: t('statusUpdated') })
-    fetchCompanies()
+    await driverService.editDriver(row.id, { vehicle_id: vehicleId })
+    $q.notify({
+      type: 'positive',
+      message: vehicleId ? t('vehicleAssigned') : t('vehicleUnassigned'),
+    })
+    fetchDrivers()
   } catch (error) {
     console.error(error)
-    $q.notify({ type: 'negative', message: t('errorUpdatingStatus') })
+    $q.notify({ type: 'negative', message: t('errorUpdatingVehicle') })
   }
 }
 
 const handleDelete = async (row) => {
   try {
-    await companyService.deleteCompany(row.id)
-    $q.notify({ type: 'positive', message: t('companyDeleted') })
-    fetchCompanies()
+    await driverService.deleteDriver(row.id)
+    $q.notify({ type: 'positive', message: t('driverDeleted') })
+    fetchDrivers()
   } catch (error) {
     console.error(error)
-    $q.notify({ type: 'negative', message: t('errorDeletingCompany') })
+    $q.notify({ type: 'negative', message: t('errorDeletingDriver') })
   }
 }
 
-const addCompany = async () => {
+const addDriver = async () => {
   Object.keys(formData).forEach((key) => {
     formData[key] = ''
   })
 
-  if (plans.value.length === 0) {
-    await fetchPlans()
+  if (vehicles.value.length === 0) {
+    await fetchVehicles()
   }
 
   const updatedInputs = inputs.map((input) => ({
     ...input,
     modelValue: ref(formData[input.key]),
-    ...(input.key === 'plan_id' ? { options: plans.value } : {}),
+    ...(input.key === 'vehicle_id' ? { options: vehicles.value } : {}),
   }))
 
   Dialog.create({
     component: SsPopUpForm,
     componentProps: {
-      popUpTitle: t('addCompany'),
+      popUpTitle: t('addDriver'),
       inputs: updatedInputs,
-      onSubmit: submitCompanyData,
+      onSubmit: submitDriverData,
     },
   })
 }
 
-const submitCompanyData = async (formData) => {
-  const dataToSend = {
-    ...formData,
-    plan_id: formData.plan_id.value,
+const submitDriverData = async (formData) => {
+  const dataToSend = { ...formData }
+
+  if (formData.vehicle_id?.value) {
+    dataToSend.vehicle_id = formData.vehicle_id.value
+  } else {
+    delete dataToSend.vehicle_id
   }
   try {
-    const response = await companyService.createCompany(dataToSend)
+    const response = await driverService.createDriver(dataToSend)
     if (response && response.status === 200) {
-      $q.notify({ type: 'positive', message: t('companyCreated') })
-      fetchCompanies()
+      $q.notify({ type: 'positive', message: t('driverCreated') })
+      fetchDrivers()
     }
     return response
   } catch (error) {
-    console.error(t('errorCreatingCompany'), error)
-    $q.notify({ type: 'negative', message: t('errorCreatingCompany') + ': ' + error })
+    console.error(t('errorCreatingDriver'), error)
+    $q.notify({ type: 'negative', message: t('errorCreatingDriver') + ': ' + error })
   }
 }
 
@@ -299,17 +323,17 @@ const submitCompanyData = async (formData) => {
 
 const tableActions = computed(() => [
   {
-    label: t('deactivateCompanies'),
-    icon: 'o_no_accounts',
+    label: t('unassignVehicles'),
+    icon: 'o_no_transfer',
     action: handlePrintIndexes,
   },
   {
-    label: t('activateCompanies'),
-    icon: 'o_account_circle',
+    label: t('assignVehicles'),
+    icon: 'o_local_shipping',
     action: handlePrintIndexes,
   },
   {
-    label: t('deleteCompanies'),
+    label: t('deleteDrivers'),
     icon: 'o_delete',
     action: handlePrintIndexes,
   },
@@ -317,10 +341,10 @@ const tableActions = computed(() => [
 
 const rowActions = [
   {
-    icon: (row) => (row.active ? 'o_no_accounts' : 'o_account_circle'),
+    icon: (row) => (row.vehicle ? 'o_local_shipping' : 'o_no_transfer'),
     color: 'primary',
-    action: (row) => toggleUserStatus(row),
-    tooltip: (row) => (row.active ? t('deactivate') : t('activate')),
+    action: (row) => toggleVehicleAssignment(row),
+    tooltip: (row) => (row.vehicle ? t('unassignVehicle') : t('assignVehicle')),
   },
   {
     icon: 'o_delete',
@@ -331,17 +355,17 @@ const rowActions = [
   {
     icon: 'o_edit',
     color: 'primary',
-    action: (row) => editCompany(row),
+    action: (row) => editDriver(row),
     tooltip: t('edit'),
   },
 ]
 
 const additionalActions = [
   {
-    label: t('addCompany'),
+    label: t('addDriver'),
     backgroundColor: '#50B5D7',
     icon: 'o_library_add',
-    action: addCompany,
+    action: addDriver,
   },
 ]
 
@@ -363,15 +387,6 @@ const inputs = [
     required: true,
     dense: true,
     placeholder: t('writeHere'),
-  },
-  {
-    label: t('nit'),
-    key: 'nit',
-    modelValue: ref(formData.nit),
-    required: true,
-    dense: true,
-    placeholder: t('writeHere'),
-    type: 'nit',
   },
   {
     label: t('email'),
@@ -401,23 +416,22 @@ const inputs = [
     placeholder: '··········',
   },
   {
-    label: t('licensesNumber'),
-    key: 'number_licenses',
-    modelValue: ref(formData.number_licenses),
+    label: t('identification'),
+    key: 'identification',
+    modelValue: ref(formData.identification),
     required: true,
     dense: true,
-    type: 'number',
     placeholder: t('writeHere'),
   },
   {
-    label: t('plan'),
-    key: 'plan_id',
-    modelValue: ref(formData.plan_id),
-    required: true,
+    label: t('vehicle'),
+    key: 'vehicle_id',
+    modelValue: ref(formData.vehicle_id),
+    required: false,
     dense: true,
     type: 'select',
-    options: plans,
-    onPopupShow: fetchPlans,
+    options: vehicles,
+    onPopupShow: fetchVehicles,
   },
 ]
 
@@ -425,7 +439,7 @@ const inputs = [
 // 7. Lifecycle and watchers
 // --------------------------------
 onMounted(() => {
-  fetchCompanies()
+  fetchDrivers()
 })
-watch(pagination, fetchCompanies, { deep: true })
+watch(pagination, fetchDrivers, { deep: true })
 </script>

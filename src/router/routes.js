@@ -16,7 +16,7 @@ const routes = [
       {
         path: 'vehicle-types',
         name: 'vehiclesTypes',
-        component: () => import('src/components/ss-vehicles/SsVehicles.vue'),
+        component: () => import('src/components/ss-vehiclesTypes/SsVehiclesTypes.vue'),
         meta: { requiresAuth: true, role: 'Admin' },
       },
       {
@@ -29,7 +29,7 @@ const routes = [
       {
         path: 'clients',
         component: () => import('src/layouts/SsClientsLayout.vue'),
-        meta: { requiresAuth: true, role: 'Admin' },
+        meta: { requiresAuth: true, role: 'Carrier' },
         children: [
           {
             path: '',
@@ -42,6 +42,30 @@ const routes = [
             component: () => import('src/components/ss-clients/SsClientDetail.vue'),
           },
         ],
+      },
+      {
+        path: 'routes-and-zones',
+        name: 'routesAndZones',
+        component: () => import('src/components/ss-routes/SsRoutes.vue'),
+        meta: { requiresAuth: true, role: 'Carrier' },
+      },
+      {
+        path: 'vehicles',
+        name: 'vehicles',
+        component: () => import('src/components/ss-vehicles/SsVehicles.vue'),
+        meta: { requiresAuth: true, role: 'Carrier' },
+      },
+      {
+        path: 'drivers',
+        name: 'drivers',
+        component: () => import('src/components/ss-drivers/SsDrivers.vue'),
+        meta: { requiresAuth: true, role: 'Carrier' },
+      },
+      {
+        path: 'managers',
+        name: 'managers',
+        component: () => import('src/components/ss-managers/SsManagers.vue'),
+        meta: { requiresAuth: true, role: 'Carrier' },
       },
     ],
   },

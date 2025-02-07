@@ -111,6 +111,15 @@ const computedRules = computed(() => {
     case 'password':
       rules.push((val) => (val && val.length >= 6) || t('passwordTooShort'))
       break
+    case 'license_plate':
+      rules.push((val) => /^[A-Z]{3}-[0-9]{3}$/.test(val) || t('invalidLicensePlate'))
+      break
+    case 'vin':
+      rules.push((val) => /^[A-HJ-NPR-Z0-9]{17}$/.test(val) || t('invalidVIN'))
+      break
+    case 'year':
+      rules.push((val) => /^[0-9]{4}$/.test(val) || t('invalidYear'))
+      break
     default:
       break
   }
