@@ -38,7 +38,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from 'stores/auth'
@@ -60,6 +60,17 @@ const roleRoutes = {
   Carrier: ['clients', 'routesAndZones', 'vehicles', 'drivers', 'managers'],
 }
 
+const links = ref([
+  { name: t('companies'), icon: 'o_person', route: 'companies', childrens: [] },
+  { name: t('vehicles_types'), icon: 'o_garage', route: 'vehiclesTypes', childrens: [] },
+  { name: t('splashes'), icon: 'o_switch_account', route: 'splashes', childrens: [] },
+  { name: t('clients'), icon: 'o_person', route: 'clients', childrens: [] },
+  { name: t('routesAndZones'), icon: 'o_pin_drop', route: 'routesAndZones', childrens: [] },
+  { name: t('vehicles'), icon: 'o_directions_car', route: 'vehicles', childrens: [] },
+  { name: t('drivers'), icon: 'o_badge', route: 'drivers', childrens: [] },
+  { name: t('managers'), icon: 'o_manage_accounts', route: 'managers', childrens: [] },
+])
+
 const filteredLinks = computed(() => {
   const role = authStore.userRole
   if (role && roleRoutes[role]) {
@@ -76,16 +87,15 @@ const filteredLinksWithoutChildren = computed(() => {
   return filteredLinks.value.filter((link) => !link.childrens || link.childrens.length === 0)
 })
 
-const links = ref([
-  { name: t('companies'), icon: 'o_person', route: 'companies', childrens: [] },
-  { name: t('vehicles_types'), icon: 'o_garage', route: 'vehiclesTypes', childrens: [] },
-  { name: t('splashes'), icon: 'o_switch_account', route: 'splashes', childrens: [] },
-  { name: t('clients'), icon: 'o_person', route: 'clients', childrens: [] },
-  { name: t('routesAndZones'), icon: 'o_pin_drop', route: 'routesAndZones', childrens: [] },
-  { name: t('vehicles'), icon: 'o_directions_car', route: 'vehicles', childrens: [] },
-  { name: t('drivers'), icon: 'o_badge', route: 'drivers', childrens: [] },
-  { name: t('managers'), icon: 'o_manage_accounts', route: 'managers', childrens: [] },
-])
+onMounted(() => {
+  const currentRoute = router.currentRoute.value.name
+  if (currentRoute === 'dashboard') {
+    const firstRoute = filteredLinks.value.length > 0 ? filteredLinks.value[0].route : null
+    if (firstRoute) {
+      navigateTo(firstRoute)
+    }
+  }
+})
 </script>
 
 <style scoped lang="scss">
