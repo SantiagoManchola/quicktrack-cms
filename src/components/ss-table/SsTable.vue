@@ -26,6 +26,7 @@
 
           <div class="table-buttons">
             <q-btn
+              v-if="showUpload"
               padding="8px 24px"
               icon="publish"
               no-caps
@@ -117,6 +118,7 @@
             :label="action.label"
             color="primary"
             flat
+            :disable="selected.length === 0"
             @click="action.action(selected)"
           />
         </div>

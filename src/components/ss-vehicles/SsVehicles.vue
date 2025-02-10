@@ -210,7 +210,7 @@ const handleDelete = async (row) => {
     fetchVehicles()
   } catch (error) {
     console.error(error)
-    $q.notify({ type: 'negative', message: t('errorDeletingVehicle') })
+    $q.notify({ type: 'negative', message: t('errorDeletingVehicle') + ': ' + error })
   }
 }
 

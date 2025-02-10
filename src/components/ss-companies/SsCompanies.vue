@@ -235,7 +235,7 @@ const handleToggleStatus = async (row) => {
     fetchCompanies()
   } catch (error) {
     console.error(error)
-    $q.notify({ type: 'negative', message: t('errorUpdatingStatus') })
+    $q.notify({ type: 'negative', message: t('errorUpdatingStatus') + ': ' + error })
   }
 }
 
@@ -246,7 +246,7 @@ const handleDelete = async (row) => {
     fetchCompanies()
   } catch (error) {
     console.error(error)
-    $q.notify({ type: 'negative', message: t('errorDeletingCompany') })
+    $q.notify({ type: 'negative', message: t('errorDeletingCompany') + ': ' + error })
   }
 }
 

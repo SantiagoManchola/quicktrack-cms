@@ -17,8 +17,41 @@
       @popup-show="onPopupShow ? onPopupShow : () => {}"
     />
 
+    <template v-else-if="type === 'date'">
+      <q-input
+        v-model="internalValue"
+        :dense="dense"
+        :clearable="clearable"
+        :rules="computedRules"
+        outlined
+        :placeholder="placeholder"
+        class="form-input"
+        @click="showDatePicker = true"
+      >
+        <template v-slot:append>
+          <q-icon
+            name="event"
+            class="cursor-pointer"
+            color="primary"
+            @click="showDatePicker = true"
+          />
+        </template>
+      </q-input>
+
+      <q-dialog v-model="showDatePicker">
+        <q-card>
+          <q-date
+            v-model="internalValue"
+            minimal
+            mask="YYYY-MM-DD"
+            @update:model-value="closeDatePicker"
+          />
+        </q-card>
+      </q-dialog>
+    </template>
+
     <q-input
-      v-if="type !== 'checkbox' && type !== 'select'"
+      v-else-if="type !== 'checkbox' && type !== 'select'"
       v-model="internalValue"
       :type="computedType"
       :placeholder="placeholder"
@@ -78,6 +111,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue'])
 
 const internalValue = ref(props.modelValue)
+const showDatePicker = ref(false)
 const isPwd = ref(props.type === 'password')
 
 const togglePwdVisibility = () => {
@@ -111,8 +145,13 @@ const computedRules = computed(() => {
     case 'password':
       rules.push((val) => (val && val.length >= 6) || t('passwordTooShort'))
       break
+    case 'date':
+      rules.push((val) => /^\d{4}-\d{2}-\d{2}$/.test(val) || t('invalidDate'))
+      break
     case 'license_plate':
-      rules.push((val) => /^[A-Z]{3}-[0-9]{3}$/.test(val) || t('invalidLicensePlate'))
+      rules.push(
+        (val) => /^[A-Z]{3}(-?[0-9]{3}|[0-9]{2}[A-Z])$/.test(val) || t('invalidLicensePlate'),
+      )
       break
     case 'vin':
       rules.push((val) => /^[A-HJ-NPR-Z0-9]{17}$/.test(val) || t('invalidVIN'))
@@ -130,6 +169,11 @@ const computedAutocomplete = computed(() => {
   return props.type === 'password' ? 'current-password' : undefined
 })
 
+const closeDatePicker = (newDate) => {
+  internalValue.value = newDate
+  showDatePicker.value = false
+}
+
 watch(
   () => props.modelValue,
   (newValue) => {
@@ -140,7 +184,10 @@ watch(
 watch(
   () => internalValue.value,
   (newValue) => {
-    emit('update:modelValue', newValue)
+    if (props.type === 'license_plate' && typeof newValue === 'string') {
+      internalValue.value = newValue.toUpperCase()
+    }
+    emit('update:modelValue', internalValue.value)
   },
 )
 </script>

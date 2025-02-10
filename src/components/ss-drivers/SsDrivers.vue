@@ -256,7 +256,7 @@ const handleAssignVehicle = async (row, vehicleId) => {
     fetchDrivers()
   } catch (error) {
     console.error(error)
-    $q.notify({ type: 'negative', message: t('errorUpdatingVehicle') })
+    $q.notify({ type: 'negative', message: t('errorUpdatingVehicle') + ': ' + error })
   }
 }
 
@@ -267,7 +267,7 @@ const handleDelete = async (row) => {
     fetchDrivers()
   } catch (error) {
     console.error(error)
-    $q.notify({ type: 'negative', message: t('errorDeletingDriver') })
+    $q.notify({ type: 'negative', message: t('errorDeletingDriver') + ': ' + error })
   }
 }
 

@@ -44,8 +44,14 @@ const routes = [
         ],
       },
       {
-        path: 'routes-and-zones',
-        name: 'routesAndZones',
+        path: 'deliveries',
+        name: 'deliveries',
+        component: () => import('src/components/ss-deliveries/SsDeliveries.vue'),
+        meta: { requiresAuth: true, role: 'Carrier' },
+      },
+      {
+        path: 'routes',
+        name: 'routes',
         component: () => import('src/components/ss-routes/SsRoutes.vue'),
         meta: { requiresAuth: true, role: 'Carrier' },
       },

@@ -172,7 +172,7 @@ const handleDelete = async (row) => {
     fetchClients()
   } catch (error) {
     console.error(error)
-    $q.notify({ type: 'negative', message: t('errorDeletingClient') })
+    $q.notify({ type: 'negative', message: t('errorDeletingClient') + ': ' + error })
   }
 }
 

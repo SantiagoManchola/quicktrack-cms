@@ -11,8 +11,6 @@
     :columns="columns"
     :loading="loading"
     :filters="filters"
-    :showUpload="true"
-    :showDownload="true"
     :tableName="$t('vehicleTypes')"
     :rowActions="rowActions"
     :additionalActions="additionalActions"
@@ -142,7 +140,7 @@ const handleDelete = async (row) => {
     fetchVehicleTypes()
   } catch (error) {
     console.error(error)
-    $q.notify({ type: 'negative', message: t('errorDeletingVehicleType') })
+    $q.notify({ type: 'negative', message: t('errorDeletingVehicleType') + ': ' + error })
   }
 }
 

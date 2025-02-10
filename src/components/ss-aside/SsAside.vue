@@ -57,7 +57,7 @@ const isActive = (routeName) => {
 
 const roleRoutes = {
   Admin: ['companies', 'vehiclesTypes', 'splashes'],
-  Carrier: ['clients', 'routesAndZones', 'vehicles', 'drivers', 'managers'],
+  Carrier: ['clients', 'deliveries', 'routes', 'vehicles', 'drivers', 'managers'],
 }
 
 const links = ref([
@@ -65,7 +65,8 @@ const links = ref([
   { name: t('vehicles_types'), icon: 'o_garage', route: 'vehiclesTypes', childrens: [] },
   { name: t('splashes'), icon: 'o_switch_account', route: 'splashes', childrens: [] },
   { name: t('clients'), icon: 'o_person', route: 'clients', childrens: [] },
-  { name: t('routesAndZones'), icon: 'o_pin_drop', route: 'routesAndZones', childrens: [] },
+  { name: t('deliveries'), icon: 'o_local_shipping', route: 'deliveries', childrens: [] },
+  { name: t('routes'), icon: 'o_pin_drop', route: 'routes', childrens: [] },
   { name: t('vehicles'), icon: 'o_directions_car', route: 'vehicles', childrens: [] },
   { name: t('drivers'), icon: 'o_badge', route: 'drivers', childrens: [] },
   { name: t('managers'), icon: 'o_manage_accounts', route: 'managers', childrens: [] },
